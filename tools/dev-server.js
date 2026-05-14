@@ -42,6 +42,5 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(port, () => {
-  console.log(`Voronoi RVE add-in server: http://localhost:${port}`);
-  console.log(`Manifest: ${path.join(root, "manifest.xml")}`);
+  console.log(`Voronoi RVE browser generator: http://localhost:${port}`);
 });

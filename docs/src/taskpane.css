@@ -68,7 +68,7 @@ input:disabled {
 .actions {
   grid-column: 1 / -1;
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
 }
 
@@ -84,11 +84,6 @@ button {
 }
 
 button + button {
-  background: #903f46;
-}
-
-button:nth-child(3),
-button:nth-child(4) {
   background: #335f7a;
 }
 

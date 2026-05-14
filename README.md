@@ -1,10 +1,10 @@
-# PowerPoint Voronoi RVE Generator
+# Browser Voronoi RVE Generator
 
-这是一个 Office.js PowerPoint 加载项原型，用于在 PowerPoint 任务窗格中输入 RVE 参数并插入 2D Voronoi RVE 图。
+这是一个纯浏览器运行的 2D 仿生多孔 Voronoi RVE 生成器。打开网页即可输入参数、预览图形，并下载 SVG/PNG。
 
 ## 参数入口
 
-- RVE宽度和高度，单位 `um`
+- RVE 宽度和高度，单位 `um`
 - 泡孔数量
 - 约束方式：输入孔隙率或输入壁厚
 - 壁厚，单位 `um`，仅在选择“输入壁厚”时作为主动输入
@@ -19,12 +19,15 @@
 
 ## 生成逻辑
 
-加载项在浏览器端用 `d3-delaunay` 生成边界裁剪的 2D Voronoi 单元。结构均匀度控制种子点分布：`随机` 保持普通随机撒点；`均匀` 对随机点做 Lloyd 质心松弛，使泡孔中心距离更接近；`不均匀` 使用聚簇随机点，使局部泡孔密集、局部稀疏。目标变异系数作为点分布控制参数，生成后界面会显示实际最近邻距离变异系数用于对比。每个单元按质心向内缩放，得到孔洞区域；2D 面积孔隙率按 `phi_2d = K^2` 与几何缩放因子关联。发泡倍率与孔隙率按 `孔隙率 = 1 - 1 / 发泡倍率` 双向换算。壁厚和孔隙率通过“约束方式”二选一输入，另一个参数自动计算，避免同时输入造成矛盾。点击 `下载SVG` 可保存可编辑矢量图，点击 `下载PNG` 可保存位图；点击 `插入PPT` 后，SVG 会转换成 PNG 并插入当前幻灯片。
+浏览器端使用 `d3-delaunay` 生成边界裁剪的 2D Voronoi 单元。结构均匀度控制种子点分布：`随机` 保持普通随机撒点；`均匀` 对随机点做 Lloyd 质心松弛，使泡孔中心距离更接近；`不均匀` 使用聚簇随机点，使局部泡孔密集、局部稀疏。目标变异系数作为点分布控制参数，生成后界面会显示实际最近邻距离变异系数用于对比。
+
+每个 Voronoi 单元按质心向内缩放，得到孔洞区域；2D 面积孔隙率按 `phi_2d = K^2` 与几何缩放因子关联。发泡倍率与孔隙率按 `孔隙率 = 1 - 1 / 发泡倍率` 双向换算。壁厚和孔隙率通过“约束方式”二选一输入，另一个参数自动计算，避免同时输入造成矛盾。
+
+点击 `下载SVG` 可保存可编辑矢量图，点击 `下载PNG` 可保存位图。
 
 ## 本地运行
 
 ```powershell
-cd D:\00_APPFiles\Codex\research\ppt-voronoi-rve-addin
 npm run dev
 ```
 
@@ -34,13 +37,7 @@ npm run dev
 http://localhost:3000/src/taskpane.html
 ```
 
-PowerPoint 侧载时使用：
-
-```text
-D:\00_APPFiles\Codex\research\ppt-voronoi-rve-addin\manifest.xml
-```
-
-注意：浏览器预览页只能验证参数、SVG 预览和计算结果；`插入PPT` 必须在 PowerPoint 侧载该 manifest 后，从 PowerPoint 的加载项任务窗格中点击才会写入当前幻灯片。
+也可以直接打开 `src/taskpane.html` 或 GitHub Pages 发布页使用。
 
 ## 说明
 

@@ -374,38 +374,6 @@ async function downloadPng() {
   }
 }
 
-async function insertIntoPowerPoint() {
-  if (!state.svgText) generateRve();
-  const canInsertIntoHost =
-    window.Office &&
-    Office.context &&
-    Office.context.document &&
-    typeof Office.context.document.setSelectedDataAsync === "function" &&
-    Office.CoercionType;
-
-  if (!canInsertIntoHost) {
-    $("metrics").innerHTML += "<br>插入PPT需要在PowerPoint侧载加载项的任务窗格中运行；浏览器预览只能生成和检查RVE图像。";
-    return;
-  }
-
-  try {
-    const imageBase64 = await svgToPngBase64(state.svgText);
-    Office.context.document.setSelectedDataAsync(
-      imageBase64,
-      { coercionType: Office.CoercionType.Image },
-      (result) => {
-        if (result.status === Office.AsyncResultStatus.Failed) {
-          $("metrics").innerHTML += `<br>插入失败: ${result.error.message}`;
-        } else {
-          $("metrics").innerHTML += "<br>已插入当前幻灯片。";
-        }
-      }
-    );
-  } catch (error) {
-    $("metrics").innerHTML += `<br>插入失败: ${error.message}`;
-  }
-}
-
 function init() {
   ["bgColor", "cellColor", "cellStrokeColor", "poreColor", "poreStrokeColor", "seedColor"].forEach((id) => {
     $(id).addEventListener("input", generateRve);
@@ -427,7 +395,6 @@ function init() {
     generateRve();
   });
   $("generate").addEventListener("click", generateRve);
-  $("insert").addEventListener("click", insertIntoPowerPoint);
   $("downloadSvg").addEventListener("click", downloadSvg);
   $("downloadPng").addEventListener("click", downloadPng);
   syncConstraintInputs();
@@ -435,8 +402,4 @@ function init() {
   generateRve();
 }
 
-if (window.Office) {
-  Office.onReady(init);
-} else {
-  window.addEventListener("DOMContentLoaded", init);
-}
+window.addEventListener("DOMContentLoaded", init);
