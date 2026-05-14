@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Voronoi RVE Generator</title>
+    <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+    <script src="../assets/vendor/d3-delaunay.min.js"></script>
+    <link rel="stylesheet" href="./taskpane.css" />
+  </head>
+  <body>
+    <main class="app">
+      <section class="controls">
+        <label>
+          <span>RVE宽度 (um)</span>
+          <input id="width" type="number" min="1" step="1" value="100" />
+        </label>
+        <label>
+          <span>RVE高度 (um)</span>
+          <input id="height" type="number" min="1" step="1" value="100" />
+        </label>
+        <label>
+          <span>泡孔数量</span>
+          <input id="cellCount" type="number" min="3" max="2000" step="1" value="80" />
+        </label>
+        <label>
+          <span>约束方式</span>
+          <select id="constraintMode">
+            <option value="porosity" selected>输入孔隙率</option>
+            <option value="wall">输入壁厚</option>
+          </select>
+        </label>
+        <label>
+          <span>壁厚 (um)</span>
+          <input id="wallThickness" type="number" min="0" step="0.1" value="1.69" />
+        </label>
+        <label>
+          <span>目标孔隙率</span>
+          <input id="porosity" type="number" min="0.01" max="0.99" step="0.01" value="0.75" />
+        </label>
+        <label>
+          <span>结构均匀度</span>
+          <select id="uniformity">
+            <option value="random" selected>随机</option>
+            <option value="uniform">均匀</option>
+            <option value="clustered">不均匀</option>
+          </select>
+        </label>
+        <label>
+          <span>目标变异系数</span>
+          <input id="targetCv" type="number" min="0.05" max="1.5" step="0.01" value="0.60" />
+        </label>
+        <label>
+          <span>随机种子</span>
+          <input id="seed" type="number" step="1" value="42" />
+        </label>
+        <div class="actions">
+          <button id="generate" type="button">生成预览</button>
+          <button id="insert" type="button">插入PPT</button>
+          <button id="downloadSvg" type="button">下载SVG</button>
+          <button id="downloadPng" type="button">下载PNG</button>
+        </div>
+      </section>
+
+      <section class="preview-wrap">
+        <div id="preview" class="preview"></div>
+      </section>
+
+      <section id="metrics" class="metrics"></section>
+    </main>
+    <script src="./taskpane.js"></script>
+  </body>
+</html>
