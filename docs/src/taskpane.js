@@ -34,6 +34,11 @@ function textValue(id, fallback) {
   return $(id).value || fallback;
 }
 
+function colorValue(id, fallback) {
+  const value = textValue(id, fallback).trim();
+  return /^#[0-9a-f]{6}$/i.test(value) ? value : fallback;
+}
+
 function randomPoints(count, width, height, rng) {
   return Array.from({ length: count }, () => [rng() * width, rng() * height]);
 }
@@ -159,7 +164,29 @@ function updateUniformityDefaults() {
 function syncConstraintInputs() {
   const constraintMode = textValue("constraintMode", "porosity");
   $("porosity").disabled = constraintMode !== "porosity";
+  $("expansionRatio").disabled = constraintMode !== "porosity";
   $("wallThickness").disabled = constraintMode !== "wall";
+}
+
+function porosityToExpansionRatio(porosity) {
+  return 1 / Math.max(1 - clamp(porosity, 0.01, 0.99), 1e-9);
+}
+
+function expansionRatioToPorosity(expansionRatio) {
+  return clamp(1 - 1 / Math.max(expansionRatio, 1.01), 0.01, 0.99);
+}
+
+function syncExpansionRatioFromPorosity() {
+  const porosity = clamp(numberValue("porosity", 0.75), 0.01, 0.99);
+  $("porosity").value = porosity.toFixed(3);
+  $("expansionRatio").value = porosityToExpansionRatio(porosity).toFixed(2);
+}
+
+function syncPorosityFromExpansionRatio() {
+  const expansionRatio = clamp(numberValue("expansionRatio", 4), 1.01, 100);
+  const porosity = expansionRatioToPorosity(expansionRatio);
+  $("expansionRatio").value = expansionRatio.toFixed(2);
+  $("porosity").value = porosity.toFixed(3);
 }
 
 function generateRve() {
@@ -172,6 +199,14 @@ function generateRve() {
   const uniformity = textValue("uniformity", "random");
   const targetCv = clamp(numberValue("targetCv", DEFAULT_TARGET_CV[uniformity] || 0.6), 0.05, 1.5);
   const seed = Math.round(numberValue("seed", 42));
+  const colors = {
+    bg: colorValue("bgColor", "#f8f8f2"),
+    cell: colorValue("cellColor", "#dfe8e6"),
+    cellStroke: colorValue("cellStrokeColor", "#344850"),
+    pore: colorValue("poreColor", "#ffffff"),
+    poreStroke: colorValue("poreStrokeColor", "#147a7e"),
+    seed: colorValue("seedColor", "#162326")
+  };
   const meanCellDiameter = Math.sqrt((4 * width * height) / (Math.PI * cellCount));
   let targetPorosity = inputPorosity;
   let wallThickness = inputWallThickness;
@@ -182,6 +217,7 @@ function generateRve() {
     k = clamp(1 - wallThickness / Math.max(meanCellDiameter, 1e-9), 0.05, 0.98);
     targetPorosity = clamp(k * k, 0.01, 0.99);
     $("porosity").value = targetPorosity.toFixed(3);
+    $("expansionRatio").value = porosityToExpansionRatio(targetPorosity).toFixed(2);
     $("wallThickness").value = wallThickness.toFixed(2);
   } else {
     targetPorosity = inputPorosity;
@@ -189,6 +225,7 @@ function generateRve() {
     wallThickness = Math.max(0, (1 - k) * meanCellDiameter);
     $("wallThickness").value = wallThickness.toFixed(2);
     $("porosity").value = targetPorosity.toFixed(3);
+    $("expansionRatio").value = porosityToExpansionRatio(targetPorosity).toFixed(2);
   }
 
   const rng = mulberry32(seed);
@@ -223,7 +260,7 @@ function generateRve() {
   const py = Math.max(320, Math.round(px * height / width));
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${px}" height="${py}" viewBox="0 0 ${width} ${height}" role="img" aria-label="2D Voronoi RVE">
   <style>
-    .bg{fill:#f8f8f2}.cell{fill:#dfe8e6;stroke:#344850;stroke-width:${Math.max(width, height) * 0.0025}}.pore{fill:#fff;stroke:#147a7e;stroke-width:${Math.max(width, height) * 0.0015}}.seed{fill:#162326}
+    .bg{fill:${colors.bg}}.cell{fill:${colors.cell};stroke:${colors.cellStroke};stroke-width:${Math.max(width, height) * 0.0025}}.pore{fill:${colors.pore};stroke:${colors.poreStroke};stroke-width:${Math.max(width, height) * 0.0015}}.seed{fill:${colors.seed}}
   </style>
   <rect class="bg" x="0" y="0" width="${width}" height="${height}"/>
   ${outerPaths.join("\n  ")}
@@ -264,6 +301,7 @@ function generateRve() {
     `约束方式: ${constraintMode === "wall" ? "输入壁厚，自动计算孔隙率" : "输入孔隙率，自动计算壁厚"}`,
     `壁厚: ${wallThickness.toFixed(2)} um`,
     `孔隙率: ${targetPorosity.toFixed(3)}`,
+    `发泡倍率: ${porosityToExpansionRatio(targetPorosity).toFixed(2)}`,
     `渲染孔隙率估计: ${renderedPorosity.toFixed(3)}`,
     `几何缩放因子 K: ${k.toFixed(3)}`
   ].join("<br>");
@@ -369,6 +407,9 @@ async function insertIntoPowerPoint() {
 }
 
 function init() {
+  ["bgColor", "cellColor", "cellStrokeColor", "poreColor", "poreStrokeColor", "seedColor"].forEach((id) => {
+    $(id).addEventListener("input", generateRve);
+  });
   $("uniformity").addEventListener("change", () => {
     updateUniformityDefaults();
     generateRve();
@@ -377,11 +418,20 @@ function init() {
     syncConstraintInputs();
     generateRve();
   });
+  $("porosity").addEventListener("change", () => {
+    syncExpansionRatioFromPorosity();
+    generateRve();
+  });
+  $("expansionRatio").addEventListener("change", () => {
+    syncPorosityFromExpansionRatio();
+    generateRve();
+  });
   $("generate").addEventListener("click", generateRve);
   $("insert").addEventListener("click", insertIntoPowerPoint);
   $("downloadSvg").addEventListener("click", downloadSvg);
   $("downloadPng").addEventListener("click", downloadPng);
   syncConstraintInputs();
+  syncExpansionRatioFromPorosity();
   generateRve();
 }
 

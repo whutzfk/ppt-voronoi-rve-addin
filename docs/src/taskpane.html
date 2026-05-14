@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Voronoi RVE Generator</title>
     <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
-    <script src="../assets/vendor/d3-delaunay.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3-delaunay@6/dist/d3-delaunay.min.js"></script>
     <link rel="stylesheet" href="./taskpane.css" />
   </head>
   <body>
@@ -39,6 +39,10 @@
           <input id="porosity" type="number" min="0.01" max="0.99" step="0.01" value="0.75" />
         </label>
         <label>
+          <span>发泡倍率</span>
+          <input id="expansionRatio" type="number" min="1.01" max="100" step="0.01" value="4.00" />
+        </label>
+        <label>
           <span>结构均匀度</span>
           <select id="uniformity">
             <option value="random" selected>随机</option>
@@ -53,6 +57,30 @@
         <label>
           <span>随机种子</span>
           <input id="seed" type="number" step="1" value="42" />
+        </label>
+        <label class="color-field">
+          <span>背景颜色</span>
+          <input id="bgColor" type="color" value="#f8f8f2" />
+        </label>
+        <label class="color-field">
+          <span>胞壁颜色</span>
+          <input id="cellColor" type="color" value="#dfe8e6" />
+        </label>
+        <label class="color-field">
+          <span>胞壁边线</span>
+          <input id="cellStrokeColor" type="color" value="#344850" />
+        </label>
+        <label class="color-field">
+          <span>孔隙颜色</span>
+          <input id="poreColor" type="color" value="#ffffff" />
+        </label>
+        <label class="color-field">
+          <span>孔隙边线</span>
+          <input id="poreStrokeColor" type="color" value="#147a7e" />
+        </label>
+        <label class="color-field">
+          <span>种子点颜色</span>
+          <input id="seedColor" type="color" value="#162326" />
         </label>
         <div class="actions">
           <button id="generate" type="button">生成预览</button>

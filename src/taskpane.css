@@ -40,6 +40,26 @@ select {
   background: #fff;
 }
 
+input[type="color"] {
+  padding: 3px;
+  cursor: pointer;
+}
+
+.color-field {
+  grid-template-columns: 1fr 44px;
+  align-items: center;
+  gap: 8px;
+}
+
+.color-field span {
+  min-width: 0;
+}
+
+.color-field input {
+  min-height: 30px;
+  height: 30px;
+}
+
 input:disabled {
   color: #6c777d;
   background: #eef2f3;
